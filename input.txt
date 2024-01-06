@@ -1,0 +1,41 @@
+void main()
+{
+    int a = 5; 
+    double b = 3.14; 
+    float c = 2.5f; 
+    // int a; //eroare pt redeclarare
+
+    double myvar;
+    printf("Introdu numar double:");
+    scanf("%f", &myvar);
+    printf("Ai introdus: %f", myvar);
+    
+    if(myvar < 5)
+    {
+        int newvar = 10;
+        printf("newvar in if = %d",newvar);
+    }
+    // printf("newvar = %d",newvar); // da eroare 
+    int new = (int)b;
+    printf("b = %f",b);
+    printf("new = %d",new);
+
+    printf("a inainte de if-else = %d",a);
+    if (a > 3) 
+    {
+        printf("sunt in if");
+        a = a + 1; 
+    }
+    else
+    {
+        printf("sunt in else");
+        a = a - 1; 
+    } 
+    printf("a dupa if-else = %d",a);
+
+    while(a<10)
+    {
+        a++;
+    }
+    printf("a dupa while = %d",a);
+}
