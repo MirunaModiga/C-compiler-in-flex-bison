@@ -164,7 +164,7 @@
 
 %union { char* sir; double val; }
 
-%token TOK_PLUS TOK_MINUS TOK_MULTIPLY TOK_DIVIDE TOK_LEFT TOK_RIGHT TOK_ERROR TOK_BRACE_LEFT TOK_BRACE_RIGHT
+%token TOK_PLUS TOK_MINUS TOK_MULTIPLY TOK_DIVIDE TOK_LEFT TOK_RIGHT TOK_ERROR TOK_BRACE_LEFT TOK_BRACE_RIGHT TOK_QUIT
 %token <sir> TOK_DECLARE
 %token <val> TOK_NUMBER
 %token <sir> TOK_VARIABLE
@@ -184,12 +184,15 @@
 
 %%
 start_program 	: TOK_DECLARE TOK_VARIABLE TOK_LEFT TOK_RIGHT BLOCK 
+				| S 
 				| TOK_ERROR { EsteCorecta = 0; }
 				;
 BLOCK 			: TOK_BRACE_LEFT {block++;} S TOK_BRACE_RIGHT { ts->deleteVariablesInBlock();block--;} 
 				|
 				;
-S 				: I S
+S 				: I ';' S
+				| IfStatement S
+				| WhileStatement S
 				|
     			;
 I : TOK_VARIABLE TOK_PLUS TOK_PLUS
@@ -402,7 +405,13 @@ I : TOK_VARIABLE TOK_PLUS TOK_PLUS
         	{
         	    if(ts->exists($2) == 0)
         	    {
-        	        ts->add($2, $4);
+					if (strcmp($1, "int") == 0 && (int)($4) != $4) {
+                		sprintf(msg, "%d:%d Eroare semantica: Tip incompatibil pentru variabila %s! Atribuire de valoare cu zecimale la int.", @1.first_line, @1.first_column, $2);
+                		yyerror(msg);
+                		YYERROR;
+            		}else{
+        	       		 ts->add($2, $4);
+					}
         	    }
         	    else
         	    {
@@ -413,8 +422,14 @@ I : TOK_VARIABLE TOK_PLUS TOK_PLUS
         	}
         	else
         	{
-        	    ts = new TVAR();
-        	    ts->add($2, $4);
+				if (strcmp($1, "int") == 0 && (int)($4) != $4) {
+                		sprintf(msg, "%d:%d Eroare semantica: Tip incompatibil pentru variabila %s! Atribuire de valoare cu zecimale la int.", @1.first_line, @1.first_column, $2);
+                		yyerror(msg);
+                		YYERROR;
+            	}else{
+        	    	ts = new TVAR();
+        	    	ts->add($2, $4);
+				}
         	}
 		}
     }
@@ -483,9 +498,6 @@ I : TOK_VARIABLE TOK_PLUS TOK_PLUS
         	}
 		}
 	}
-	| ';'
-	| IfStatement 
-	| WhileStatement
     ;
 IfStatement : TOK_IF TOK_LEFT E TOK_RIGHT {if_exp=true;if($3!=0){ifFlag=1;}else{elseFlag=1;ifFlag=1;}} BLOCK {ifFlag=0;} ElseStatement
     ;
